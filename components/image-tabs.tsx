@@ -24,7 +24,7 @@ export default function ImageTabs() {
                             className={`${activeTab === "board" ? "bg-primary text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
                         >Manage Boards</Button>
                     </div>
-                    <div className="relative mx-auto max-w-5xl overflow-hidden rounded-lg border-gray-200 shadow-xl">
+                    <div className="mx-auto max-w-5xl overflow-hidden rounded-lg border-gray-200 shadow-xl">
                         {
                             activeTab === "organise" && (
                                 <Image
