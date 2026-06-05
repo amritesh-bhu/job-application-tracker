@@ -5,6 +5,9 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import React, { useState } from "react";
+import { signIn } from "@/lib/auth/auth-client";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 
 export default function SignIn() {
@@ -14,8 +17,31 @@ export default function SignIn() {
         password: ""
     })
 
-    const handleSignInData = (e: React.FormEvent) => {
+    const [error, setError] = useState("")
+    const [loading, setLoading] = useState(false)
+
+    const router = useRouter()
+
+    const handleSignInData = async (e: React.FormEvent) => {
         e.preventDefault()
+
+        setError("")
+        setLoading(true)
+
+        try {
+            const result = await signIn.email({
+                ...signInData
+            })
+            if (result.error) {
+                setError(result.error.message ?? "Failed to sign in")
+            } else {
+                router.push("/dashboard")
+            }
+        } catch (err) {
+            setError("some error occured")
+        } finally {
+            setLoading(false)
+        }
     }
 
     return (
@@ -27,6 +53,11 @@ export default function SignIn() {
                 </CardHeader>
                 <form onSubmit={handleSignInData} className="space-y-4">
                     <CardContent className="space-y-4">
+                        {error && (
+                            <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive">
+                                {error}
+                            </div>
+                        )}
                         <div className="space-y-2">
                             <Label htmlFor="email" className="text-gray-700">Email</Label>
                             <Input
@@ -56,14 +87,13 @@ export default function SignIn() {
                         <Button
                             type="submit"
                             className="w-full bg-primary hover:bg-primary/90"
+                            disabled={loading}
                         >
-                            Sign In
+                            {loading ? "Signing in..." : "Sign In"}
                         </Button>
                         <p className="text-center text-sm text-gray-600">
                             Don't have an account?{" "}
-
-                            Sign in
-
+                            <Link href="/sign-up" className="text-primary font-medium">Sign Up</Link>
                         </p>
                     </CardFooter>
                 </form>

@@ -4,6 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { signUp } from "@/lib/auth/auth-client";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 export default function SignUp() {
@@ -13,9 +16,30 @@ export default function SignUp() {
         password: ""
     })
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const [error, setError] = useState("")
+    const [loading, setLoading] = useState(false)
+
+    const router = useRouter()
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        console.log("signUpData", signUpData)
+
+        setError("")
+        setLoading(true)
+        try {
+            const result = await signUp.email({
+                ...signUpData
+            })
+            if (result.error) {
+                setError(result.error.message ?? "Failed to sign up")
+            } else {
+                router.push("/dashboard")
+            }
+        } catch (err) {
+            setError("Some error occured")
+        } finally {
+            setLoading(false)
+        }
     }
 
     return (
@@ -27,6 +51,11 @@ export default function SignUp() {
                 </CardHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <CardContent className="space-y-4">
+                        {error && (
+                            <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive">
+                                {error}
+                            </div>
+                        )}
                         <div className="space-y-2">
                             <Label htmlFor="name" className="text-gray-700">Name</Label>
                             <Input
@@ -68,14 +97,13 @@ export default function SignUp() {
                         <Button
                             type="submit"
                             className="w-full bg-primary hover:bg-primary/90"
+                            disabled={loading}
                         >
-                            Sign Up
+                            {loading ? "Creating Account..." : "Sign Up"}
                         </Button>
                         <p className="text-center text-sm text-gray-600">
                             Already have an account?{" "}
-
-                            Sign in
-
+                            <Link href="/sign-in" className="text-primary font-medium">Sign in</Link>
                         </p>
                     </CardFooter>
                 </form>
